@@ -2,8 +2,10 @@ package main
 
 import (
 	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"flag"
+	"io/ioutil"
 	"os"
 )
 
@@ -46,40 +48,96 @@ func ReadKey() []byte {
 	return key
 }
 
-// ParsePayload parses the payload from the command line arguments.
-func ParsePayload() []byte {
-	payload := flag.String("payload", "", "string to encrypt")
-	flag.Parse()
-
-	src := []byte(*payload)
-	if len(src) == 0 {
-		logger.Fatalw("no payload provided")
-	} else if len(src)%aes.BlockSize != 0 {
-		logger.Fatalw(
-			"payload is not a multiple of aes.BlockSize",
-			"payload length:", len(src),
+func GetGCM() *cipher.AEAD {
+	key := ReadKey()
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		logger.Errorw(
+			"error when creating a block",
+			"error", err.Error(),
 		)
 	}
-	return src
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		logger.Errorw(
+			"error when creating a GCM-wrapped gcm",
+			"error", err.Error(),
+		)
+	}
+
+	return &gcm
+}
+
+func GenerateNonce(size int) *[]byte {
+	nonce := make([]byte, size)
+	n, err := rand.Read(nonce)
+	if err != nil {
+		logger.Errorw(err.Error())
+	}
+	logger.Infof("generated nonce: (%d bytes)", n)
+	return &nonce
 }
 
 func main() {
-	key := ReadKey()
-	cipher, err := aes.NewCipher(key)
-	if err != nil {
-		logger.Errorw(
-			"error when creating a cipher",
-			"error message", err.Error(),
+	payload := *flag.String("payload", "", "string to encrypt")
+	file := *flag.String("file", "", "file to encrypt")
+	encrypt := *flag.Bool("encrypt", false, "encrypt")
+	decrypt := *flag.Bool("decrypt", false, "decrypt")
+	flag.Parse()
+
+	if encrypt && decrypt {
+		logger.Fatalw("cannot encrypt and decrypt at the same time")
+	} else if !encrypt && !decrypt {
+		logger.Fatalw("specify either encrypt or decrypt")
+	}
+
+	src := []byte(payload)
+	if len(src) == 0 {
+		logger.Fatalw("no payload provided")
+	} else if len(src) < aes.BlockSize {
+		logger.Fatalw(
+			"payload is too short",
+			"payload length:", len(src),
 		)
 	}
 
-	src := ParsePayload()
-	dst := make([]byte, len(src))
+	gcm := *GetGCM()
+	if encrypt {
+		nonce := *GenerateNonce(gcm.NonceSize())
+		encrypted := gcm.Seal(
+			nil, // dst
+			nonce,
+			src,
+			nil, // additional data
+		)
+		logger.Infof("encrypted: %s", encrypted)
+	} else if decrypt && file != "" {
+		if _, err := os.Stat(file); err != nil {
+			logger.Fatalw(
+				"file does not exist",
+				"file:", file,
+			)
+		}
 
-	{
-		cipher.Encrypt(dst, src)
-		logger.Infof("encrypted: %s", string(dst))
+		// read in file
+		encrypted, err := ioutil.ReadFile(file)
+		if err != nil {
+			logger.Errorw(err.Error())
+		}
+		decrypted, err := gcm.Open(
+			nil, // dst
+			nil, // nonce,
+			encrypted,
+			nil, // additional data
+		)
+		if err != nil {
+			logger.Errorw(err.Error())
+		}
+		logger.Infof("decrypted: %s", decrypted)
+	}
+	/*
 		cipher.Decrypt(dst, dst)
 		logger.Infof("decrypted: %s", string(dst))
-	}
+	*/
 }
