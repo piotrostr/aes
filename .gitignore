@@ -1,2 +1,5 @@
 key
 log.json
+aed
+*.enc
+*.dec
