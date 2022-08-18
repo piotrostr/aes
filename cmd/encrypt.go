@@ -21,8 +21,13 @@ var encryptCmd = &cobra.Command{
 			return
 		}
 		path := args[0]
+
+		gcm := crypto.GCM{}
+		gcm.Initialize()
+
 		plaintext := crypto.GetFileContents(path)
-		cipertext := crypto.Encrypt(plaintext)
+		cipertext := gcm.Encrypt(plaintext)
+
 		outpath := path + ".enc"
 		ioutil.WriteFile(outpath, cipertext, 0o644)
 	},

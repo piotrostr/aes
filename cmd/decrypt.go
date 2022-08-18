@@ -17,9 +17,20 @@ var decryptCmd = &cobra.Command{
 			return
 		}
 		path := args[0]
+
+		gcm := crypto.GCM{}
+		gcm.Initialize()
+
 		ciphertext := crypto.GetFileContents(path)
-		plaintext := crypto.Decrypt(ciphertext)
-		outpath := path + ".dec"
+		plaintext := gcm.Decrypt(ciphertext)
+
+		var outpath string
+		if path[len(path)-4:] == ".enc" {
+			outpath = path[:len(path)-4]
+		} else {
+			outpath = path + ".dec"
+		}
+
 		ioutil.WriteFile(outpath, plaintext, 0o644)
 	},
 }
