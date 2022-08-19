@@ -14,8 +14,16 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "aes",
 	Short: "Encode and Decode text with AES",
-	Long: `AES is a symmetric encryption algorithm that can be used to encrypt and decrypt data. 
-It is used to encrypt data at rest at Google.`,
+	Long: `
+
+ █████╗ ███████╗███████╗     ██████╗  ██████╗ 
+██╔══██╗██╔════╝██╔════╝    ██╔════╝ ██╔═══██╗
+███████║█████╗  ███████╗    ██║  ███╗██║   ██║
+██╔══██║██╔══╝  ╚════██║    ██║   ██║██║   ██║
+██║  ██║███████╗███████║    ╚██████╔╝╚██████╔╝
+╚═╝  ╚═╝╚══════╝╚══════╝     ╚═════╝  ╚═════╝ 
+
+[BETA!] AES is a symmetric encryption algorithm that can be used to encrypt and decrypt data. It is used to encrypt data at rest at Google.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

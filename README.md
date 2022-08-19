@@ -21,10 +21,6 @@ go build .
 ./aes
 ```
 
-Will add a config later so that the package can be used as a command line tool,
-for now the `key` and `nonce` files are generated in the working directory of
-the package.
-
 ## Usage
 
 ```sh
@@ -39,8 +35,8 @@ Usage:
 
 Available Commands:
   completion  Generate the autocompletion script for the specified shell
-  decrypt     A brief description of your command
-  encrypt     AES-256-GCM Encrypt a file
+  decrypt     Decrypts a file using AES-256-GCM
+  encrypt     Encrypts a file using AES-256-GCM
   help        Help about any command
   stdin       Encrypt input from stdin
 
@@ -59,6 +55,12 @@ This is not production software and it is not affiliated with Google. I wrote
 it for educational purposes, not as part of my employment. I have not tested
 the security and protocol compliance (yet) so please be careful when dealing
 with sensitive data!
+
+## TODOs
+
+Will add a config later so that the package can be used as a command line tool,
+for now the `key` and `nonce` files are generated in the working directory of
+the package. They will be specifiable in the future, also planning to allow stdin.
 
 ## License
 

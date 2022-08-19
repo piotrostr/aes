@@ -14,7 +14,7 @@ import (
 // encryptCmd represents the encrypt command
 var encryptCmd = &cobra.Command{
 	Use:   "encrypt [path]",
-	Short: "AES-256-GCM Encrypt a file",
+	Short: "Encrypts a file using AES-256-GCM",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			cmd.Help()

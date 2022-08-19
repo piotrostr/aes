@@ -9,8 +9,8 @@ import (
 
 // decryptCmd represents the decrypt command
 var decryptCmd = &cobra.Command{
-	Use:   "decrypt",
-	Short: "A brief description of your command",
+	Use:   "decrypt [file]",
+	Short: "Decrypts a file using AES-256-GCM",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			cmd.Help()
